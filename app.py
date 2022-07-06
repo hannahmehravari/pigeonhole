@@ -7,44 +7,33 @@ import pytz
 st.header('Pigeonhole', anchor=None)
 st.caption('Get a list of emails of people present in the office.')
 
-robin_org_id = st.text_input('Enter Robin organisation ID:')
-robin_key = st.text_input('Enter Robin access token:')
-if not robin_key or robin_org_id:
-    if not robin_key:
-        st.warning('Please input an access token.')
+form = st.form("Authorisation")
+robin_org_id = form.text_input('Enter Robin organisation ID:')
+robin_key = form.text_input('Enter Robin access token:')
+submit = form.form_submit_button("Submit")
 
+if submit:
+    locations = get_locations(robin_key, robin_org_id)
+    col1, col2, col3 = st.columns(3)
 
-    if not robin_org_id:
-        st.warning('Please input an organisation ID.')
-    
-    st.stop()
+    with col1:
+        selected_location = st.selectbox("Office", locations.keys())
+        timezones = list(set([location['timezone'] for location in locations.values()]))
+        default_ix = timezones.index(locations[selected_location]['timezone'])
+        selected_timezone = st.selectbox('Timezone', timezones, index=default_ix)
 
-locations = get_locations(robin_key, robin_org_id)
+    with col2:
+        date_from = st.date_input("Start date", datetime.date.today())
+        time_from = st.time_input('Start time', datetime.time(8, 00))
 
-col1, col2, col3 = st.columns(3)
+    with col3:
+        date_to = st.date_input("End date", datetime.date.today())
+        time_to = st.time_input('End time', datetime.time(18, 00))
 
-with col1:
-    selected_location = st.selectbox("Office", locations.keys())
-    timezones = list(set([location['timezone'] for location in locations.values()]))
-    default_ix = timezones.index(locations[selected_location]['timezone'])
-    selected_timezone = st.selectbox('Timezone', timezones, index=default_ix)
-
-with col2:
-    date_from = st.date_input("Start date", datetime.date.today())
-    time_from = st.time_input('Start time', datetime.time(8, 00))
-
-with col3:
-    date_to = st.date_input("End date", datetime.date.today())
-    time_to = st.time_input('End time', datetime.time(18, 00))
-
-tz = pytz.timezone(selected_timezone)
-start = datetime.datetime.combine(date_from, time_from).replace(tzinfo=tz).isoformat()
-
-end = datetime.datetime.combine(date_to, time_to).replace(tzinfo=tz).isoformat()
-
-emails = get_emails(locations[selected_location]['id'], start, end, robin_key)
-
-df = pd.DataFrame({'Email': emails})
-
-styler = df.style.hide_index()
-st.write(styler.to_html(), unsafe_allow_html=True)
+    tz = pytz.timezone(selected_timezone)
+    start = datetime.datetime.combine(date_from, time_from).replace(tzinfo=tz).isoformat()
+    end = datetime.datetime.combine(date_to, time_to).replace(tzinfo=tz).isoformat()
+    emails = get_emails(locations[selected_location]['id'], start, end, robin_key)
+    df = pd.DataFrame({'Email': emails})
+    styler = df.style.hide_index()
+    st.write(styler.to_html(), unsafe_allow_html=True)

@@ -7,29 +7,33 @@ import pytz
 st.header('Pigeonhole', anchor=None)
 st.caption('Get a list of emails of people present in the office.')
 
-form = st.form("Authorisation")
-robin_org_id = form.text_input('Enter Robin organisation ID:')
-robin_key = form.text_input('Enter Robin access token:')
-submit = form.form_submit_button("Submit")
+
+with st.form("Authorisation"):
+    robin_org_id = st.text_input('Enter Robin organisation ID:')
+    robin_key = st.text_input('Enter Robin access token:')
+
+    if robin_org_id and robin_key:
+
+        locations = get_locations(robin_key, robin_org_id)
+        col1, col2, col3 = st.columns(3)
+
+        with col1:
+            selected_location = st.selectbox("Office", locations.keys())
+            timezones = list(set([location['timezone'] for location in locations.values()]))
+            default_ix = timezones.index(locations[selected_location]['timezone'])
+            selected_timezone = st.selectbox('Timezone', timezones, index=default_ix)
+
+        with col2:
+            date_from = st.date_input("Start date", datetime.date.today())
+            time_from = st.time_input('Start time', datetime.time(8, 00))
+
+        with col3:
+            date_to = st.date_input("End date", datetime.date.today())
+            time_to = st.time_input('End time', datetime.time(18, 00))
+
+    submit = st.form_submit_button("Submit")
 
 if submit:
-    locations = get_locations(robin_key, robin_org_id)
-    col1, col2, col3 = st.columns(3)
-
-    with col1:
-        selected_location = st.selectbox("Office", locations.keys())
-        timezones = list(set([location['timezone'] for location in locations.values()]))
-        default_ix = timezones.index(locations[selected_location]['timezone'])
-        selected_timezone = st.selectbox('Timezone', timezones, index=default_ix)
-
-    with col2:
-        date_from = st.date_input("Start date", datetime.date.today())
-        time_from = st.time_input('Start time', datetime.time(8, 00))
-
-    with col3:
-        date_to = st.date_input("End date", datetime.date.today())
-        time_to = st.time_input('End time', datetime.time(18, 00))
-
     tz = pytz.timezone(selected_timezone)
     start = datetime.datetime.combine(date_from, time_from).replace(tzinfo=tz).isoformat()
     end = datetime.datetime.combine(date_to, time_to).replace(tzinfo=tz).isoformat()

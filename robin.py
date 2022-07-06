@@ -11,7 +11,6 @@ def get_headers(access_token):
 def get_locations(access_token, organisation_id):
     url = f"{robin_api_base_url}organizations/{organisation_id}/locations/?&page=1&per_page=100"
     headers = get_headers(access_token)
-
     return {location['name']: {'id': location['id'], 'timezone': location['time_zone']} for location in requests.get(url, headers=headers).json()['data']}
 
 def get_emails(location_id, start, end, access_token):

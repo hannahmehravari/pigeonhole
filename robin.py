@@ -1,8 +1,4 @@
 import requests
-import os
-from dotenv import load_dotenv
-
-load_dotenv()
 
 robin_api_base_url = 'https://api.robinpowered.com/v1.0/'
 

@@ -4,8 +4,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-organisation_id = os.getenv('organisation_id')
-robin_api_base_url = os.getenv('robin_api_base_url')
+robin_api_base_url = 'https://api.robinpowered.com/v1.0/'
 
 def get_headers(access_token):
     return {
@@ -13,7 +12,7 @@ def get_headers(access_token):
     "Authorization": f"Access-Token {access_token}"
 }
 
-def get_locations(access_token):
+def get_locations(access_token, organisation_id):
     url = f"{robin_api_base_url}organizations/{organisation_id}/locations/?&page=1&per_page=100"
     headers = get_headers(access_token)
 

@@ -12,11 +12,12 @@ robin_key = st.text_input('Enter Robin access token:')
 if not robin_key or robin_org_id:
     if not robin_key:
         st.warning('Please input an access token.')
-        st.stop()
+
 
     if not robin_org_id:
         st.warning('Please input an organisation ID.')
-        st.stop()
+    
+    st.stop()
 
 locations = get_locations(robin_key, robin_org_id)
 
